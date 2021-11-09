@@ -57,7 +57,8 @@ public class ApiServiceImpl implements ApiService {
             users.get().setOtp(0);
             usersRepo.save(users.get());
             System.out.println("successfully logged into the Coherent data keeper Application");
-            return "successfully logged into the Coherent data keeper Application ";
+          //  return "successfully logged into the Coherent data keeper Application ";
+            return users.get().getEmail();
         }
         System.out.println("Please Enter a valid OTP Number");
         return "Please Enter a valid OTP Number";
