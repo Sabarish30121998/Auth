@@ -43,14 +43,4 @@ public class OAuth {
     private LocalDateTime modifiedAt;
 
 
-/*id	SMALLINT(5)
-access_token	MEDIUMTEXT
-user_id_fk	SMALLINT(5)
-refresh_token	MEDIUMTEXT
-tot_attempt	SMALLINT(1)
-deleted_flag	tinyint(1)
-created_at	CURRENT_TIMESTAMP
-modified_at	CURRENT_TIMESTAMP
-
-*/
 }
