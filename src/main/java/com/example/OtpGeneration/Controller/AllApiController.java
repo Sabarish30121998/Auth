@@ -23,31 +23,34 @@ public class AllApiController {
     }
 
 
-    @PostMapping("/generateotp/{email}")
-    public BaseResponse generateOTP(@PathVariable String email){
-        String response = apiService.generateOTP(email);
+    @PostMapping("/generateotp")
+    public BaseResponse generateOTP(@RequestBody CreateUserDTO createUserDTO){
+        String response = apiService.generateOTP(createUserDTO.getEmail());
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setData(response);
         return baseResponse;
     }
 
 
-    @GetMapping("/validateotp/{mailotp}/{email}")
-    public BaseResponse validateOTP(@PathVariable int mailotp,@PathVariable String email){
-        String response = apiService.validateOTP(mailotp,email);
+    @PostMapping("/validateotp")
+    public BaseResponse validateOTP(@RequestBody CreateUserDTO createUserDTO){
+        String response = apiService.validateOTP(createUserDTO.getOtp(), createUserDTO.getEmail());
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setData(response);
         return baseResponse;
     }
 
 
-    @PostMapping("/resendotp/{email}")
-    public BaseResponse resendOTP(@PathVariable String email){
-        String response = apiService.resendOTP(email);
+    @PostMapping("/resendotp")
+    public BaseResponse resendOTP(@RequestBody CreateUserDTO createUserDTO){
+        String response = apiService.resendOTP(createUserDTO.getEmail());
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setData(response);
         return baseResponse;
     }
+
+
+
 
 
 
