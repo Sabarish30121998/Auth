@@ -26,7 +26,7 @@ public class OAuth {
     private short userIdFk;
 
     @Column(name = "refresh_token")
-    private int refreshToken;
+    private String refreshToken;
 
     @Column(name = "tot_attempt")
     private short totAttempt;

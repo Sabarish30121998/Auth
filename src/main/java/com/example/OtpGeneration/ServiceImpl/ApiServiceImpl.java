@@ -2,7 +2,9 @@ package com.example.OtpGeneration.ServiceImpl;
 
 import com.example.OtpGeneration.DTO.CreateUserDTO;
 import com.example.OtpGeneration.DTO.LoginRequestDTO;
+import com.example.OtpGeneration.Entity.OAuth;
 import com.example.OtpGeneration.Entity.Users;
+import com.example.OtpGeneration.Repository.OAuthRepo;
 import com.example.OtpGeneration.Repository.UsersRepo;
 import com.example.OtpGeneration.Service.ApiService;
 import io.jsonwebtoken.JwtBuilder;
@@ -97,27 +99,37 @@ public class ApiServiceImpl implements ApiService {
 
 }
 
+    @Autowired
+    OAuthRepo oAuthRepo;
 
     @Override
     public String validateOTP(LoginRequestDTO loginRequestDTO) {
         Optional<Users> users = usersRepo.findByEmail(loginRequestDTO.getEmail());
         if (users.isPresent()) {
-            if (users.get().getOtp() == loginRequestDTO.getOtp() && users.get().getOtp() !=0) {
+            if(users.get().getOtp() !=0){
+              if (users.get().getOtp() == loginRequestDTO.getOtp()) {
                 String token = generateToken("SUBJECT", loginRequestDTO.getEmail(), loginRequestDTO.getOtp());
+                OAuth oAuth = new OAuth();
+                oAuth.setAccessToken(token);
+                oAuth.setRefreshToken(token);
+                oAuth.setUserIdFk(users.get().getId());
+                oAuthRepo.save(oAuth);
                 users.get().setOtp(0);
                 usersRepo.save(users.get());
                 return token;
-            } else {
+              }
+              else {
                 throw new RuntimeException("Enter a  valid OTP Number");
+              }
+            }
+            else {
+                throw new RuntimeException("Generated a Otp number");
             }
         }
         else{
                 throw new RuntimeException("You are not a Member of Coherent Pixel or enter a valid email id");
-            }
         }
-
-
-
+    }
 
     public static String generateToken(String subject,String email, int otp)
     {
