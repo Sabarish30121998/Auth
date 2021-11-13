@@ -5,5 +5,4 @@ import lombok.Data;
 @Data
 public class CreateUserDTO {
     private String email;
-    private int otp;
 }
