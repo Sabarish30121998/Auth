@@ -1,6 +1,8 @@
 package com.example.OtpGeneration.Entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,6 +15,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
+@NoArgsConstructor
 public class Users {
 
     @Id
@@ -57,7 +60,6 @@ public class Users {
             inverseJoinColumns = {@JoinColumn(name = "fk_role_id",referencedColumnName = "role_id")}
     )
     private List<Role> listOfRole;
-
 
 
 }

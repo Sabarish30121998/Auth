@@ -5,8 +5,10 @@ import com.example.OtpGeneration.DTO.LoginRequestDTO;
 import com.example.OtpGeneration.DTO.MailDTO;
 import com.example.OtpGeneration.Entity.OAuth;
 import com.example.OtpGeneration.Entity.Role;
+import com.example.OtpGeneration.Entity.UserRole;
 import com.example.OtpGeneration.Entity.Users;
 import com.example.OtpGeneration.Repository.OAuthRepo;
+import com.example.OtpGeneration.Repository.UserRoleRepo;
 import com.example.OtpGeneration.Repository.UsersRepo;
 import com.example.OtpGeneration.Service.ApiService;
 import io.jsonwebtoken.JwtBuilder;
@@ -15,6 +17,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
@@ -151,5 +155,37 @@ public class ApiServiceImpl implements ApiService {
         return builder.compact();
     }
 
+    @Autowired
+    UserRoleRepo userRoleRepo;
 
+    public UserDetails loadByEmail(String email) {
+        Optional<Users> users = usersRepo.findByEmail(email);
+        List<Role> roleList = new LinkedList<>();
+        if(users == null){
+               throw new RuntimeException("email not found");
+        }
+
+
+//        users.get().getListOfRole().stream().forEachOrdered(role -> {
+//
+//        });
+
+        List<UserRole> userRole = userRoleRepo.findByUsersEmail(users.get().getEmail());
+        userRole.stream().forEachOrdered(userRole1 -> {
+            Role role = userRole1.getRole();
+            roleList.add(role);
+        });
+
+        String otpCode = Integer.toString(users.get().getOtp());
+        return new org.springframework.security.core.userdetails.User(users.get().getEmail(),otpCode,getAuthority(roleList));
+
+    }
+
+    private List getAuthority(List<Role> roleList) {
+         List authorities = new ArrayList();
+         roleList.stream().forEachOrdered(role -> {
+             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleName()));
+         });
+         return authorities;
+    }
 }

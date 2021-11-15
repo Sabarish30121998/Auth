@@ -7,7 +7,11 @@ import com.example.OtpGeneration.DTO.MailDTO;
 import com.example.OtpGeneration.Entity.Users;
 import com.example.OtpGeneration.Service.ApiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/cdk-auth-service/user")
@@ -49,6 +53,12 @@ public class AllApiController {
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setData(response);
         return baseResponse;
+    }
+
+    @RolesAllowed(value = "USER")
+    @GetMapping("/summa")
+    public  String summa(){
+        return "summa with USER";
     }
 
 }
