@@ -1,17 +1,18 @@
 package com.example.OtpGeneration.Service;
 
-import com.example.OtpGeneration.DTO.CreateUserDTO;
+import com.example.OtpGeneration.DTO.CreateUserDTOs;
 import com.example.OtpGeneration.DTO.LoginRequestDTO;
+import com.example.OtpGeneration.DTO.MailDTO;
 import com.example.OtpGeneration.Entity.Users;
 import org.springframework.stereotype.Service;
 
 @Service
 public interface ApiService {
-    String createUser(CreateUserDTO createUserDTO);
+    Object createUser(CreateUserDTOs createUserDTOs);
 
-    String generateOTP(CreateUserDTO createUserDTO);
+    String generateOTP(MailDTO mailDTO);
 
-    String resendOTP(CreateUserDTO createUserDTO);
+    String resendOTP(MailDTO mailDTO);
 
     String validateOTP(LoginRequestDTO loginRequestDTO);
 }

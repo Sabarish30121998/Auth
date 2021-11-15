@@ -1,8 +1,10 @@
 package com.example.OtpGeneration.ServiceImpl;
 
-import com.example.OtpGeneration.DTO.CreateUserDTO;
+import com.example.OtpGeneration.DTO.CreateUserDTOs;
 import com.example.OtpGeneration.DTO.LoginRequestDTO;
+import com.example.OtpGeneration.DTO.MailDTO;
 import com.example.OtpGeneration.Entity.OAuth;
+import com.example.OtpGeneration.Entity.Role;
 import com.example.OtpGeneration.Entity.Users;
 import com.example.OtpGeneration.Repository.OAuthRepo;
 import com.example.OtpGeneration.Repository.UsersRepo;
@@ -16,9 +18,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 
-import java.util.Date;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class ApiServiceImpl implements ApiService {
@@ -31,30 +31,37 @@ public class ApiServiceImpl implements ApiService {
 
 
     @Override
-    public String createUser(CreateUserDTO createUserDTO) {
+    public Object createUser(CreateUserDTOs createUserDTOs) {
         try {
             Users users = new Users();
-            users.setEmail(createUserDTO.getEmail());
+            users.setEmail(createUserDTOs.getEmail());
+            List<Role> roleList = new LinkedList<>();
+            createUserDTOs.getUserRole().stream().forEachOrdered(roleDTO -> {
+                 Role role = new Role();
+                 role.setRoleName(roleDTO.getRoleName());
+                 roleList.add(role);
+            });
+            users.setListOfRole(roleList);
             usersRepo.save(users);
-            return "Successfully added to the Coherent Family";
+            return users;
+//            return "Successfully added to the Coherent Family";
         }
         catch (Exception e)
         {
             throw new RuntimeException("Something went wrong");
         }
-
     }
 
     @Override
-    public String generateOTP(CreateUserDTO createUserDTO) {
-        Optional<Users> users = usersRepo.findByEmail(createUserDTO.getEmail());
+    public String generateOTP(MailDTO mailDTO) {
+        Optional<Users> users = usersRepo.findByEmail(mailDTO.getEmail());
         if (users.isPresent()){
             if(users.get().getOtp() == 0){
                 Random random = new Random();
                 int OTP = 100000 + random.nextInt(900000);
                 SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
                 simpleMailMessage.setFrom("sabarishwaran.manoharan@coherent.in");
-                simpleMailMessage.setTo(createUserDTO.getEmail());
+                simpleMailMessage.setTo(mailDTO.getEmail());
                 simpleMailMessage.setSubject("Login OTP message");
                 simpleMailMessage.setText("OTP number is " + OTP + ". This OTP Number is for Login into the Coherent Pixels Data Keeper Application.");
                 users.get().setOtp(OTP);
@@ -74,14 +81,14 @@ public class ApiServiceImpl implements ApiService {
 
 
     @Override
-    public String resendOTP(CreateUserDTO createUserDTO) {
-       Optional<Users> users = usersRepo.findByEmail(createUserDTO.getEmail());
+    public String resendOTP(MailDTO mailDTO) {
+       Optional<Users> users = usersRepo.findByEmail(mailDTO.getEmail());
        if (users.isPresent()){
           if(users.get().getOtp() != 0){
             int OTP= users.get().getOtp();
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
             simpleMailMessage.setFrom("sabarishwaran.manoharan@coherent.in");
-            simpleMailMessage.setTo(createUserDTO.getEmail());
+            simpleMailMessage.setTo(mailDTO.getEmail());
             simpleMailMessage.setSubject("Login OTP message");
             simpleMailMessage.setText("Resended OTP number is " + OTP + ". This OTP Number is for Login into the Coherent Pixels Data Keeper Application.");
             System.out.println("Resended OTP number is " + OTP + "." );
@@ -108,7 +115,7 @@ public class ApiServiceImpl implements ApiService {
         if (users.isPresent()) {
             if(users.get().getOtp() !=0){
               if (users.get().getOtp() == loginRequestDTO.getOtp()) {
-                String token = generateToken("SUBJECT", loginRequestDTO.getEmail(), loginRequestDTO.getOtp());
+                String token = generateToken("SUBJECT", loginRequestDTO.getEmail(), loginRequestDTO.getOtp(),users.get().getListOfRole());
                 OAuth oAuth = new OAuth();
                 oAuth.setAccessToken(token);
                 oAuth.setRefreshToken(token);
@@ -131,13 +138,14 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
-    public static String generateToken(String subject,String email, int otp)
+    public static String generateToken(String subject,String email, int otp, List<Role> roles)
     {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         JwtBuilder builder = Jwts.builder().setSubject(subject)
                 .claim("email",email)
                 .claim("OTP",otp)
+                .claim("Roles",roles)
                 .signWith(SignatureAlgorithm.HS256,"secrets")
                 .setIssuedAt(now);
         return builder.compact();

@@ -1,8 +1,9 @@
 package com.example.OtpGeneration.Controller;
 
 import com.example.OtpGeneration.BaseResponse.BaseResponse;
-import com.example.OtpGeneration.DTO.CreateUserDTO;
+import com.example.OtpGeneration.DTO.CreateUserDTOs;
 import com.example.OtpGeneration.DTO.LoginRequestDTO;
+import com.example.OtpGeneration.DTO.MailDTO;
 import com.example.OtpGeneration.Entity.Users;
 import com.example.OtpGeneration.Service.ApiService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,8 @@ public class AllApiController {
     ApiService apiService;
 
     @PostMapping("/createuser")
-    public BaseResponse createuser(@RequestBody CreateUserDTO createUserDTO) {
-        String response = apiService.createUser(createUserDTO);
+    public BaseResponse createuser(@RequestBody CreateUserDTOs createUserDTOs) {
+        Object response = apiService.createUser(createUserDTOs);
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setData(response);
         return baseResponse;
@@ -25,8 +26,8 @@ public class AllApiController {
 
 
     @PostMapping("/generateotp")
-    public BaseResponse generateOTP(@RequestBody CreateUserDTO createUserDTO){
-        String response = apiService.generateOTP(createUserDTO);
+    public BaseResponse generateOTP(@RequestBody MailDTO mailDTO){
+        String response = apiService.generateOTP(mailDTO);
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setData(response);
         return baseResponse;
@@ -34,8 +35,8 @@ public class AllApiController {
 
 
     @PostMapping("/resendotp")
-    public BaseResponse resendOTP(@RequestBody CreateUserDTO createUserDTO){
-        String response = apiService.resendOTP(createUserDTO);
+    public BaseResponse resendOTP(@RequestBody MailDTO mailDTO){
+        String response = apiService.resendOTP(mailDTO);
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setData(response);
         return baseResponse;

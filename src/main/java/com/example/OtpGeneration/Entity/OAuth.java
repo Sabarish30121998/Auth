@@ -18,14 +18,14 @@ public class OAuth {
     @Column(name = "id")
     private short id;
 
-    @Column(name = "access_token")
+    @Column(name = "access_token",length = 1000)
     private String accessToken;
 
   //  @OneToOne
     @Column(name = "user_id_fk")
     private short userIdFk;
 
-    @Column(name = "refresh_token")
+    @Column(name = "refresh_token",length = 1000)
     private String refreshToken;
 
     @Column(name = "tot_attempt")
