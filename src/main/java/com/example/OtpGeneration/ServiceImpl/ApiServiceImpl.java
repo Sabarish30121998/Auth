@@ -125,8 +125,8 @@ public class ApiServiceImpl implements ApiService {
                 oAuth.setRefreshToken(token);
                 oAuth.setUserIdFk(users.get().getId());
                 oAuthRepo.save(oAuth);
-              //  users.get().setOtp(0);
-              //  usersRepo.save(users.get());
+                users.get().setOtp(0);
+                usersRepo.save(users.get());
                 return token;
               }
               else {
@@ -164,12 +164,6 @@ public class ApiServiceImpl implements ApiService {
         if(users == null){
                throw new RuntimeException("email not found");
         }
-
-
-//        users.get().getListOfRole().stream().forEachOrdered(role -> {
-//
-//        });
-
         List<UserRole> userRole = userRoleRepo.findByUsersEmail(users.get().getEmail());
         userRole.stream().forEachOrdered(userRole1 -> {
             Role role = userRole1.getRole();
