@@ -8,11 +8,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true,jsr250Enabled = true)
 @EnableWebSecurity
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -46,5 +47,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
     }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers("/cdk-auth-service/user/createuser",
+                "/cdk-auth-service/user/generateotp",
+                "/cdk-auth-service/user/resendotp",
+                //    "/cdk-auth-service/user/summa",
+                "/cdk-auth-service/user/validateotp");
+    }
+    /*@Override
+    public void configure(WebSecurity webSecurity) throws Exception
+    {
+        webSecurity
+                .ignoring()
+                .antMatchers("/user/create","/user/loggedin","/role/create");
+    }*/
+
 }
 

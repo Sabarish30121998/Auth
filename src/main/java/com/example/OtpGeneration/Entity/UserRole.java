@@ -17,7 +17,6 @@ public class UserRole {
     private short userRoleId;
 
     @OneToOne
-    @JsonIgnore
     @JoinColumn(name = "fk_users_id")
     private Users users;
 

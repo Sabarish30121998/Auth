@@ -55,7 +55,7 @@ public class AllApiController {
         return baseResponse;
     }
 
-    @RolesAllowed(value = "USER")
+    @RolesAllowed(value = "user")
     @GetMapping("/summa")
     public  String summa(){
         return "summa with USER";

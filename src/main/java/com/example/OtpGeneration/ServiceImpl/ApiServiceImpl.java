@@ -117,7 +117,7 @@ public class ApiServiceImpl implements ApiService {
     public String validateOTP(LoginRequestDTO loginRequestDTO) {
         Optional<Users> users = usersRepo.findByEmail(loginRequestDTO.getEmail());
         if (users.isPresent()) {
-            if(users.get().getOtp() !=0){
+            if(users.get().getOtp() != 0){
               if (users.get().getOtp() == loginRequestDTO.getOtp()) {
                 String token = generateToken("SUBJECT", loginRequestDTO.getEmail(), loginRequestDTO.getOtp(),users.get().getListOfRole());
                 OAuth oAuth = new OAuth();
@@ -125,8 +125,8 @@ public class ApiServiceImpl implements ApiService {
                 oAuth.setRefreshToken(token);
                 oAuth.setUserIdFk(users.get().getId());
                 oAuthRepo.save(oAuth);
-                users.get().setOtp(0);
-                usersRepo.save(users.get());
+              //  users.get().setOtp(0);
+              //  usersRepo.save(users.get());
                 return token;
               }
               else {
@@ -175,6 +175,10 @@ public class ApiServiceImpl implements ApiService {
             Role role = userRole1.getRole();
             roleList.add(role);
         });
+//        users.get().getListOfRole().stream().forEachOrdered(role -> {
+//            Role role1 = role;
+//            roleList.add(role1);
+//        });
 
         String otpCode = Integer.toString(users.get().getOtp());
         return new org.springframework.security.core.userdetails.User(users.get().getEmail(),otpCode,getAuthority(roleList));
