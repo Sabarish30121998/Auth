@@ -1,14 +1,10 @@
 package com.example.OtpGeneration.ServiceImpl;
 
-import com.example.OtpGeneration.DTO.CreateUserDTOs;
 import com.example.OtpGeneration.DTO.LoginRequestDTO;
 import com.example.OtpGeneration.DTO.MailDTO;
 import com.example.OtpGeneration.Entity.OAuth;
-import com.example.OtpGeneration.Entity.Role;
-import com.example.OtpGeneration.Entity.UserRole;
 import com.example.OtpGeneration.Entity.Users;
 import com.example.OtpGeneration.Repository.OAuthRepo;
-import com.example.OtpGeneration.Repository.UserRoleRepo;
 import com.example.OtpGeneration.Repository.UsersRepo;
 import com.example.OtpGeneration.Service.ApiService;
 import io.jsonwebtoken.JwtBuilder;
@@ -17,6 +13,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -35,20 +32,12 @@ public class ApiServiceImpl implements ApiService {
 
 
     @Override
-    public Object createUser(CreateUserDTOs createUserDTOs) {
+    public Object createUser(MailDTO mailDTO) {
         try {
             Users users = new Users();
-            users.setEmail(createUserDTOs.getEmail());
-            List<Role> roleList = new LinkedList<>();
-            createUserDTOs.getUserRole().stream().forEachOrdered(roleDTO -> {
-                 Role role = new Role();
-                 role.setRoleName(roleDTO.getRoleName());
-                 roleList.add(role);
-            });
-            users.setListOfRole(roleList);
+            users.setEmail(mailDTO.getEmail());
             usersRepo.save(users);
             return users;
-//            return "Successfully added to the Coherent Family";
         }
         catch (Exception e)
         {
@@ -119,7 +108,7 @@ public class ApiServiceImpl implements ApiService {
         if (users.isPresent()) {
             if(users.get().getOtp() != 0){
               if (users.get().getOtp() == loginRequestDTO.getOtp()) {
-                String token = generateToken("SUBJECT", loginRequestDTO.getEmail(), loginRequestDTO.getOtp(),users.get().getListOfRole());
+                String token = generateToken("SUBJECT", loginRequestDTO.getEmail(), loginRequestDTO.getOtp());
                 OAuth oAuth = new OAuth();
                 oAuth.setAccessToken(token);
                 oAuth.setRefreshToken(token);
@@ -142,48 +131,32 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
-    public static String generateToken(String subject,String email, int otp, List<Role> roles)
+    public static String generateToken(String subject,String email, int otp)
     {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         JwtBuilder builder = Jwts.builder().setSubject(subject)
                 .claim("email",email)
                 .claim("OTP",otp)
-                .claim("Roles",roles)
                 .signWith(SignatureAlgorithm.HS256,"secrets")
                 .setIssuedAt(now);
         return builder.compact();
     }
 
-    @Autowired
-    UserRoleRepo userRoleRepo;
+
 
     public UserDetails loadByEmail(String email) {
         Optional<Users> users = usersRepo.findByEmail(email);
-        List<Role> roleList = new LinkedList<>();
         if(users == null){
                throw new RuntimeException("email not found");
         }
-        List<UserRole> userRole = userRoleRepo.findByUsersEmail(users.get().getEmail());
-        userRole.stream().forEachOrdered(userRole1 -> {
-            Role role = userRole1.getRole();
-            roleList.add(role);
-        });
-//        users.get().getListOfRole().stream().forEachOrdered(role -> {
-//            Role role1 = role;
-//            roleList.add(role1);
-//        });
-
         String otpCode = Integer.toString(users.get().getOtp());
-        return new org.springframework.security.core.userdetails.User(users.get().getEmail(),otpCode,getAuthority(roleList));
+        return new org.springframework.security.core.userdetails.User(users.get().getEmail(),otpCode,getAuthorities());
 
     }
 
-    private List getAuthority(List<Role> roleList) {
-         List authorities = new ArrayList();
-         roleList.stream().forEachOrdered(role -> {
-             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleName()));
-         });
-         return authorities;
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<SimpleGrantedAuthority> list = new ArrayList<SimpleGrantedAuthority>();
+        return list;
     }
 }

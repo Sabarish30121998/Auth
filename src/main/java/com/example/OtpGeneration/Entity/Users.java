@@ -54,12 +54,4 @@ public class Users {
     private short modifiedBy;
 
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "userrole",
-            joinColumns = {@JoinColumn(name="fk_users_id",referencedColumnName =  "users_id")},
-            inverseJoinColumns = {@JoinColumn(name = "fk_role_id",referencedColumnName = "role_id")}
-    )
-    private List<Role> listOfRole;
-
-
 }
