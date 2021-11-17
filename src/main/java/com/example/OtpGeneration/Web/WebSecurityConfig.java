@@ -55,14 +55,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 "/cdk-auth-service/user/resendotp",
                 //    "/cdk-auth-service/user/summa",
                 "/cdk-auth-service/user/validateotp");
+        web.ignoring()
+                .antMatchers(SAUTH_FOR_SWAGGER);
     }
-    /*@Override
-    public void configure(WebSecurity webSecurity) throws Exception
-    {
-        webSecurity
-                .ignoring()
-                .antMatchers("/user/create","/user/loggedin","/role/create");
-    }*/
+    private static final String[] SAUTH_FOR_SWAGGER = { "/swagger-resources/**",
+            "/swagger-ui.html",
+            "/",
+            "/v2/api-docs",
+            "/webjars/**"
+    };
 
 }
 
