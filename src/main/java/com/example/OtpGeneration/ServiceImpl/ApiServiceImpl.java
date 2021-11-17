@@ -4,6 +4,7 @@ import com.example.OtpGeneration.DTO.LoginRequestDTO;
 import com.example.OtpGeneration.DTO.MailDTO;
 import com.example.OtpGeneration.Entity.OAuth;
 import com.example.OtpGeneration.Entity.Users;
+import com.example.OtpGeneration.Exception.MailIdNotFoundexception;
 import com.example.OtpGeneration.Repository.OAuthRepo;
 import com.example.OtpGeneration.Repository.UsersRepo;
 import com.example.OtpGeneration.Service.ApiService;
@@ -41,7 +42,7 @@ public class ApiServiceImpl implements ApiService {
         }
         catch (Exception e)
         {
-            throw new RuntimeException("Something went wrong");
+            throw new RuntimeException("Something went wrong Account is not Created");
         }
     }
 
@@ -68,7 +69,7 @@ public class ApiServiceImpl implements ApiService {
                 throw new RuntimeException("Otp is already generated");
             }
         }else {
-            throw new RuntimeException("You are not a Member of Coherent Pixel or Enter a valid email id");
+            throw new MailIdNotFoundexception("You are not a Member of Coherent Pixel or Enter a valid email id");
         }
     }
 
@@ -90,11 +91,11 @@ public class ApiServiceImpl implements ApiService {
             return " Resend OTP (Mail has been successfully sended)";
           }
           else {
-            throw new RuntimeException("Otp is already generated");
+            throw new RuntimeException("Please Generate a OTP");
           }
     }
     else {
-       throw new RuntimeException("You are not a Member of Coherent Pixel or enter a valid email id");
+       throw new MailIdNotFoundexception("You are not a Member of Coherent Pixel or enter a valid email id");
     }
 
 }
@@ -127,7 +128,7 @@ public class ApiServiceImpl implements ApiService {
             }
         }
         else{
-                throw new RuntimeException("You are not a Member of Coherent Pixel or enter a valid email id");
+                throw new MailIdNotFoundexception("You are not a Member of Coherent Pixel or enter a valid email id");
         }
     }
 
