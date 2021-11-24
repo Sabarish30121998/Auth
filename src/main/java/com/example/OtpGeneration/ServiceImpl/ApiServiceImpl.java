@@ -2,12 +2,14 @@ package com.example.OtpGeneration.ServiceImpl;
 
 import com.example.OtpGeneration.DTO.LoginRequestDTO;
 import com.example.OtpGeneration.DTO.MailDTO;
+import com.example.OtpGeneration.DTO.RefreshTokenDTO;
 import com.example.OtpGeneration.Entity.OAuth;
 import com.example.OtpGeneration.Entity.Users;
 import com.example.OtpGeneration.Exception.MailIdNotFoundexception;
 import com.example.OtpGeneration.Repository.OAuthRepo;
 import com.example.OtpGeneration.Repository.UsersRepo;
 import com.example.OtpGeneration.Service.ApiService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -104,20 +106,27 @@ public class ApiServiceImpl implements ApiService {
     OAuthRepo oAuthRepo;
 
     @Override
-    public String validateOTP(LoginRequestDTO loginRequestDTO) {
+    public Object validateOTP(LoginRequestDTO loginRequestDTO) {
         Optional<Users> users = usersRepo.findByEmail(loginRequestDTO.getEmail());
         if (users.isPresent()) {
             if(users.get().getOtp() != 0){
               if (users.get().getOtp() == loginRequestDTO.getOtp()) {
-                String token = generateToken("SUBJECT", loginRequestDTO.getEmail(), loginRequestDTO.getOtp());
+                String accesstoken = AccessTokenMethod("SUBJECT", loginRequestDTO.getEmail(), loginRequestDTO.getOtp());
+                String refreshtoken = RefreshTokenMethod("SUBJECT", loginRequestDTO.getEmail(), loginRequestDTO.getOtp());
                 OAuth oAuth = new OAuth();
-                oAuth.setAccessToken(token);
-                oAuth.setRefreshToken(token);
+                oAuth.setAccessToken(accesstoken);
+                oAuth.setRefreshToken(refreshtoken);
                 oAuth.setUserIdFk(users.get().getId());
                 oAuthRepo.save(oAuth);
                 users.get().setOtp(0);
                 usersRepo.save(users.get());
-                return token;
+//                List<String> list = new ArrayList() ;
+//                list.add(0,accesstoken);
+//                list.add(1,refreshtoken);
+                Map<String,String> map = new HashMap<>();
+                map.put("AccessToken",accesstoken);
+                map.put("RefreshToken",refreshtoken);
+                return map;
               }
               else {
                 throw new RuntimeException("Enter a  valid OTP Number");
@@ -132,14 +141,73 @@ public class ApiServiceImpl implements ApiService {
         }
     }
 
-    public static String generateToken(String subject,String email, int otp)
+
+    @Override
+    public Object refreshedToken(RefreshTokenDTO refreshTokenDTO){
+        Optional<Users> users = usersRepo.findByEmail(refreshTokenDTO.getEmail());
+        if (users.isPresent()){
+            if(users.get().getDeletedFlag()==0){
+               Claims claims = Jwts.parser().setSigningKey("secrets").parseClaimsJws(refreshTokenDTO.getRefreshtoken()).getBody();
+                   String email = String.valueOf(claims.get("email"));
+                   int otp = Integer.valueOf((Integer) claims.get("OTP"));
+                   String subject = String.valueOf(claims.getSubject());
+                   String accessToken = AccessTokenMethod(subject,email,otp);
+                   String refreshToken = RefreshTokenMethod(subject,email,otp);
+                   OAuth oAuth = new OAuth();
+                   oAuth.setAccessToken(accessToken);
+                   oAuth.setRefreshToken(refreshToken);
+                   oAuth.setUserIdFk(users.get().getId());
+                   oAuthRepo.save(oAuth);
+                   Map<String,String> stringMap = new HashMap<>();
+                   stringMap.put("RefreshToken",refreshToken);
+                   stringMap.put("AccessToken",accessToken);
+//                   List<String> list = new ArrayList<>();
+//                   list.add(0,accessToken);
+//                   list.add(1,refreshToken);
+                   return stringMap;
+            }
+            else {
+                throw new RuntimeException("This Users is Blocked");
+            }
+        }
+        else {
+           throw new  MailIdNotFoundexception("You are not a Member of Coherent Pixel or enter a valid email id");
+        }
+    }
+
+    public static String AccessTokenMethod(String subject,String email, int otp)
     {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
+
+        //expirary time is just  5 minute
+        Long expirationTimeInMillis = nowMillis +  1000 * 60 * 10;
+        Date expiryDate = new Date(expirationTimeInMillis);
+
         JwtBuilder builder = Jwts.builder().setSubject(subject)
                 .claim("email",email)
                 .claim("OTP",otp)
                 .signWith(SignatureAlgorithm.HS256,"secrets")
+                .setIssuer("www.coherentpixels.in")
+                .setExpiration(expiryDate)
+                .setIssuedAt(now);
+        return builder.compact();
+    }
+
+    public static String RefreshTokenMethod(String subject,String email, int otp)
+    {
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+
+        //expirary time is just 20 minute
+        Long expirationTimeInMillis = nowMillis +  1000 * 60 * 20;
+        Date expiryDate = new Date(expirationTimeInMillis);
+
+        JwtBuilder builder = Jwts.builder().setSubject(subject)
+                .claim("email",email)
+                .claim("OTP",otp)
+                .signWith(SignatureAlgorithm.HS256,"secrets")
+                .setExpiration(expiryDate)
                 .setIssuedAt(now);
         return builder.compact();
     }

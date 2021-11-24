@@ -3,9 +3,12 @@ package com.example.OtpGeneration.Controller;
 import com.example.OtpGeneration.BaseResponse.BaseResponse;
 import com.example.OtpGeneration.DTO.LoginRequestDTO;
 import com.example.OtpGeneration.DTO.MailDTO;
+import com.example.OtpGeneration.DTO.RefreshTokenDTO;
 import com.example.OtpGeneration.Service.ApiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/cdk-auth-service/user")
@@ -43,7 +46,16 @@ public class AllApiController {
 
     @PostMapping("/validateotp")
     public BaseResponse validateOTP(@RequestBody LoginRequestDTO loginRequestDTO){
-        String response = apiService.validateOTP(loginRequestDTO);
+        Object response = apiService.validateOTP(loginRequestDTO);
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setData(response);
+        return baseResponse;
+    }
+
+
+    @PostMapping("/refreshtoken")
+    public BaseResponse refreshTokens(@RequestBody RefreshTokenDTO refreshTokenDTO){
+        Object response = apiService.refreshedToken(refreshTokenDTO);
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setData(response);
         return baseResponse;

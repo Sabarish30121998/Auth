@@ -2,7 +2,10 @@ package com.example.OtpGeneration.Service;
 
 import com.example.OtpGeneration.DTO.LoginRequestDTO;
 import com.example.OtpGeneration.DTO.MailDTO;
+import com.example.OtpGeneration.DTO.RefreshTokenDTO;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface ApiService {
@@ -12,5 +15,7 @@ public interface ApiService {
 
     String resendOTP(MailDTO mailDTO);
 
-    String validateOTP(LoginRequestDTO loginRequestDTO);
+    Object validateOTP(LoginRequestDTO loginRequestDTO);
+
+    Object refreshedToken(RefreshTokenDTO refreshTokenDTO);
 }

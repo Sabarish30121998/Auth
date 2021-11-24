@@ -41,6 +41,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/cdk-auth-service/user/generateotp",
                         "/cdk-auth-service/user/resendotp",
                     //    "/cdk-auth-service/user/summa",
+                        "/cdk-auth-service/user/refreshtoken",
                         "/cdk-auth-service/user/validateotp").permitAll()
                 .anyRequest().authenticated().and()
                 .formLogin().permitAll();
