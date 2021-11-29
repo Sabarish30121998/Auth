@@ -5,9 +5,13 @@ import com.example.OtpGeneration.DTO.LoginRequestDTO;
 import com.example.OtpGeneration.DTO.MailDTO;
 import com.example.OtpGeneration.DTO.RefreshTokenDTO;
 import com.example.OtpGeneration.Service.ApiService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -27,8 +31,8 @@ public class AllApiController {
 
 
     @PostMapping("/generateotp")
-    public BaseResponse generateOTP(@RequestBody MailDTO mailDTO){
-        String response = apiService.generateOTP(mailDTO);
+    public BaseResponse generateOTP(@RequestBody MailDTO mailDTO,HttpServletRequest request){
+        String response = apiService.generateOTP(mailDTO,request);
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setData(response);
         return baseResponse;
@@ -62,8 +66,12 @@ public class AllApiController {
     }
 
     @GetMapping("/summa")
-    public  String summa(){
-        return "summa with USER";
+    public  String summa(HttpServletRequest request){
+        String token = request.getHeader("Authorization");
+        String freshtoken=token.substring(7,token.length());
+        Claims claims = Jwts.parser().setSigningKey("secrets").parseClaimsJws(freshtoken).getBody();
+        String Email = String.valueOf(claims.get("email"));
+        return Email;
     }
 
 }

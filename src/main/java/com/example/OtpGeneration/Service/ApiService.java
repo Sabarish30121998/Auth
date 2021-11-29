@@ -5,13 +5,14 @@ import com.example.OtpGeneration.DTO.MailDTO;
 import com.example.OtpGeneration.DTO.RefreshTokenDTO;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Service
 public interface ApiService {
     Object createUser(MailDTO mailDTO);
 
-    String generateOTP(MailDTO mailDTO);
+    String generateOTP(MailDTO mailDTO, HttpServletRequest request);
 
     String resendOTP(MailDTO mailDTO);
 

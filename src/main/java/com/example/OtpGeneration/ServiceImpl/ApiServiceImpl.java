@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Service
@@ -49,7 +50,7 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public String generateOTP(MailDTO mailDTO) {
+    public String generateOTP(MailDTO mailDTO,HttpServletRequest request) {
         Optional<Users> users = usersRepo.findByEmail(mailDTO.getEmail());
         if (users.isPresent()){
             if(users.get().getOtp() == 0){
@@ -65,7 +66,9 @@ public class ApiServiceImpl implements ApiService {
                 System.out.println("OTP number is " + OTP + ".");
                 System.out.println(" This OTP Number is for Login into the Coherent Pixels Data Keeper Application.");
                 javaMailSender.send(simpleMailMessage);
-                return "Mail has been successfully sended";
+                String email = getEmailfromtoken(request);
+                return  email;
+               // return "Mail has been successfully sended";
             }
             else {
                 throw new RuntimeException("Otp is already generated");
@@ -181,7 +184,7 @@ public class ApiServiceImpl implements ApiService {
         Date now = new Date(nowMillis);
 
         //expirary time is just  5 minute
-        Long expirationTimeInMillis = nowMillis +  1000 * 60 * 10;
+        Long expirationTimeInMillis = nowMillis +  1000 * 60 * 1;
         Date expiryDate = new Date(expirationTimeInMillis);
 
         JwtBuilder builder = Jwts.builder().setSubject(subject)
@@ -228,4 +231,17 @@ public class ApiServiceImpl implements ApiService {
         List<SimpleGrantedAuthority> list = new ArrayList<SimpleGrantedAuthority>();
         return list;
     }
+
+
+    public String getEmailfromtoken(HttpServletRequest request){
+        String BearerToken = request.getHeader("Authorization");
+        if(!(BearerToken==null)) {
+            String AccessToken = BearerToken.substring(7, BearerToken.length());
+            Claims claims = Jwts.parser().setSigningKey("secrets").parseClaimsJws(AccessToken).getBody();
+            String Email = String.valueOf(claims.get("email"));
+            return Email;
+        }
+        return "sabarishwaran@gmail.com";
+    }
+
 }
