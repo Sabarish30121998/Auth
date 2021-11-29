@@ -12,7 +12,7 @@ import java.util.List;
 public interface ApiService {
     Object createUser(MailDTO mailDTO);
 
-    String generateOTP(MailDTO mailDTO, HttpServletRequest request);
+    String generateOTP(MailDTO mailDTO);
 
     String resendOTP(MailDTO mailDTO);
 

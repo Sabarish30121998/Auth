@@ -31,8 +31,8 @@ public class AllApiController {
 
 
     @PostMapping("/generateotp")
-    public BaseResponse generateOTP(@RequestBody MailDTO mailDTO,HttpServletRequest request){
-        String response = apiService.generateOTP(mailDTO,request);
+    public BaseResponse generateOTP(@RequestBody MailDTO mailDTO){
+        String response = apiService.generateOTP(mailDTO);
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setData(response);
         return baseResponse;
